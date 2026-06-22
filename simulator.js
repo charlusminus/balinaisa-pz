@@ -319,7 +319,7 @@ async function submitForm(e) {
   };
 
   // TODO: replace with Activepieces webhook URL
-  const WEBHOOK_URL = 'https://cloud.activepieces.com/api/v1/webhooks/WXeeVsSmfGvEGKWSzfZqE';
+  const WEBHOOK_URL = 'https://cloud.activepieces.com/api/v1/webhooks/vBqWuW1eudqSQG4eFkacG';
 
   try {
     await fetch(WEBHOOK_URL, {

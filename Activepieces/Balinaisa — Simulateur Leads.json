@@ -1,0 +1,243 @@
+{
+  "name": "Balinaisa — Simulateur Leads",
+  "type": "SHARED",
+  "summary": "Réception des demandes de devis issues du simulateur homestaging. Notifie Balinaisa, envoie une confirmation au lead, et enregistre dans Google Sheets.",
+  "description": "",
+  "tags": ["balinaisa", "lead", "simulateur"],
+  "blogUrl": "",
+  "metadata": {
+    "externalId": "balinaisa-simulateur-leads-v1"
+  },
+  "author": "Paktiz",
+  "categories": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-smtp",
+    "@activepieces/piece-google-sheets"
+  ],
+  "flows": [
+    {
+      "displayName": "Balinaisa — Simulateur Leads",
+      "trigger": {
+        "name": "trigger",
+        "valid": true,
+        "displayName": "Réception demande simulateur",
+        "type": "PIECE_TRIGGER",
+        "settings": {
+          "sampleData": {
+            "body": {
+              "name": "Marie Dupont",
+              "email": "marie@exemple.fr",
+              "phone": "06 12 34 56 78",
+              "message": "Je souhaite 4 chaises Joko pour ma salle à manger.",
+              "product": "Joko",
+              "qty": 4,
+              "price_ttc": "1003.68",
+              "source": "simulateur-balinaisa"
+            }
+          },
+          "propertySettings": {
+            "authType": { "type": "MANUAL" },
+            "authFields": { "type": "MANUAL", "schema": {} }
+          },
+          "pieceName": "@activepieces/piece-webhook",
+          "pieceVersion": "0.1.29",
+          "triggerName": "catch_webhook",
+          "input": {
+            "authType": "none",
+            "authFields": {}
+          }
+        },
+        "nextAction": {
+          "name": "step_1",
+          "skip": false,
+          "type": "CODE",
+          "valid": true,
+          "displayName": "Formater date et heure de réception",
+          "lastUpdatedDate": "2026-06-22T00:00:00.000Z",
+          "settings": {
+            "input": {},
+            "sampleData": {},
+            "sourceCode": {
+              "code": "export const code = async (inputs) => {\n  const now = new Date();\n  const pad = (n) => String(n).padStart(2, '0');\n  const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;\n  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;\n  return {\n    date,\n    time,\n    datetime: `${date} ${time}`,\n    iso: now.toISOString()\n  };\n};",
+              "packageJson": "{}"
+            },
+            "errorHandlingOptions": {
+              "retryOnFailure": { "value": false },
+              "continueOnFailure": { "value": true }
+            }
+          },
+          "nextAction": {
+            "name": "step_2",
+            "skip": false,
+            "type": "CODE",
+            "valid": true,
+            "displayName": "Calculer le devis",
+            "lastUpdatedDate": "2026-06-22T00:00:00.000Z",
+            "settings": {
+              "input": {
+                "product": "{{trigger['body']['product']}}",
+                "qty": "{{trigger['body']['qty']}}",
+                "price_ttc": "{{trigger['body']['price_ttc']}}"
+              },
+              "sampleData": {},
+              "sourceCode": {
+                "code": "export const code = async (inputs) => {\n  const qty = parseInt(inputs.qty) || 1;\n  const priceTTC = parseFloat(inputs.price_ttc) || 0;\n  const priceHT = priceTTC / 1.2;\n  const tva = priceTTC - priceHT;\n  const unitPriceHT = priceHT / qty;\n  const hasDiscount = qty >= 4;\n  const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';\n  return {\n    qty,\n    product: inputs.product || 'N/A',\n    unit_price_ht: fmt(unitPriceHT),\n    total_ht: fmt(priceHT),\n    tva: fmt(tva),\n    total_ttc: fmt(priceTTC),\n    has_discount: hasDiscount,\n    discount_label: hasDiscount ? 'Remise pack ×4 appliquée (−10%)' : ''\n  };\n};",
+                "packageJson": "{}"
+              },
+              "errorHandlingOptions": {
+                "retryOnFailure": { "value": false },
+                "continueOnFailure": { "value": true }
+              }
+            },
+            "nextAction": {
+              "name": "step_3",
+              "skip": false,
+              "type": "PIECE",
+              "valid": true,
+              "displayName": "Notifier Balinaisa — nouveau lead simulateur",
+              "lastUpdatedDate": "2026-06-22T00:00:00.000Z",
+              "settings": {
+                "pieceName": "@activepieces/piece-smtp",
+                "actionName": "send-email",
+                "pieceVersion": "0.3.12",
+                "sampleData": {},
+                "input": {
+                  "auth": "{{connections['KjJDiOyNMh3TXw8HF9VFz']}}",
+                  "to": ["contact@balinaisa.com", "charles.alzon@gmail.com"],
+                  "cc": [],
+                  "bcc": [],
+                  "from": "noreply@paktiz.fr",
+                  "replyTo": "{{trigger['body']['email']}}",
+                  "senderName": "Simulateur Balinaisa",
+                  "subject": "🪵 Nouveau lead simulateur — {{trigger['body']['name']}} — {{step_2['product']}} ×{{step_2['qty']}}",
+                  "body_type": "html",
+                  "body": "<!DOCTYPE html><html><body style=\"font-family: Inter, Arial, sans-serif; background: #F3EFE9; padding: 32px; margin: 0;\">\n  <div style=\"max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);\">\n\n    <!-- Header -->\n    <div style=\"background: #8B6B45; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between;\">\n      <span style=\"font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;\">Balinaisa</span>\n      <span style=\"font-size: 12px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.1em;\">Nouveau lead simulateur</span>\n    </div>\n\n    <!-- Body -->\n    <div style=\"padding: 32px;\">\n      <p style=\"margin: 0 0 8px; font-size: 22px; font-weight: 600; color: #1A1714;\">{{trigger['body']['name']}}</p>\n      <p style=\"margin: 0 0 28px; font-size: 14px; color: #9E9188;\">Demande reçue le {{step_1['date']}} à {{step_1['time']}} via le simulateur IA</p>\n\n      <!-- Contact info -->\n      <table style=\"width: 100%; border-collapse: collapse; margin-bottom: 24px;\">\n        <tr>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 12px; color: #9E9188; text-transform: uppercase; letter-spacing: 0.06em; width: 110px;\">Email</td>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 14px;\"><a href=\"mailto:{{trigger['body']['email']}}\" style=\"color: #8B6B45; text-decoration: none;\">{{trigger['body']['email']}}</a></td>\n        </tr>\n        <tr>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 12px; color: #9E9188; text-transform: uppercase; letter-spacing: 0.06em;\">Téléphone</td>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 14px; color: #1A1714;\">{{trigger['body']['phone']}}</td>\n        </tr>\n        <tr>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 12px; color: #9E9188; text-transform: uppercase; letter-spacing: 0.06em;\">Message</td>\n          <td style=\"padding: 10px 0; border-bottom: 1px solid #E4DDD3; font-size: 14px; color: #1A1714; line-height: 1.6;\">{{trigger['body']['message']}}</td>\n        </tr>\n      </table>\n\n      <!-- Devis simulateur -->\n      <div style=\"background: #FAF8F5; border: 1px solid #E4DDD3; border-radius: 10px; padding: 20px 24px; margin-bottom: 28px;\">\n        <p style=\"margin: 0 0 14px; font-size: 11px; font-weight: 600; color: #9E9188; text-transform: uppercase; letter-spacing: 0.08em;\">Devis simulateur</p>\n        <table style=\"width: 100%; border-collapse: collapse;\">\n          <tr>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">Produit</td>\n            <td style=\"padding: 6px 0; font-size: 14px; font-weight: 600; color: #1A1714; text-align: right;\">{{step_2['product']}}</td>\n          </tr>\n          <tr>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">Quantité</td>\n            <td style=\"padding: 6px 0; font-size: 14px; font-weight: 600; color: #1A1714; text-align: right;\">{{step_2['qty']}}</td>\n          </tr>\n          <tr>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">Prix unitaire HT</td>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #1A1714; text-align: right;\">{{step_2['unit_price_ht']}}</td>\n          </tr>\n          <tr>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">Total HT</td>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #1A1714; text-align: right;\">{{step_2['total_ht']}}</td>\n          </tr>\n          <tr>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">TVA 20%</td>\n            <td style=\"padding: 6px 0; font-size: 14px; color: #1A1714; text-align: right;\">{{step_2['tva']}}</td>\n          </tr>\n          <tr style=\"border-top: 2px solid #E4DDD3;\">\n            <td style=\"padding: 10px 0 6px; font-size: 15px; font-weight: 700; color: #1A1714;\">Total TTC</td>\n            <td style=\"padding: 10px 0 6px; font-size: 16px; font-weight: 700; color: #8B6B45; text-align: right;\">{{step_2['total_ttc']}}</td>\n          </tr>\n        </table>\n        {{#if step_2['has_discount']}}\n        <p style=\"margin: 10px 0 0; font-size: 12px; color: #3D7A5A;\">✓ {{step_2['discount_label']}}</p>\n        {{/if}}\n      </div>\n\n      <!-- CTA -->\n      <a href=\"mailto:{{trigger['body']['email']}}?subject=Votre devis Balinaisa — {{step_2['product']}} ×{{step_2['qty']}}&body=Bonjour {{trigger['body']['name']}},%0A%0AMerci pour votre simulation...\" style=\"display: inline-block; background: #8B6B45; color: #ffffff; padding: 13px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;\">Répondre à {{trigger['body']['name']}} →</a>\n    </div>\n\n    <!-- Footer -->\n    <div style=\"background: #FAF8F5; padding: 14px 32px; border-top: 1px solid #E4DDD3;\">\n      <p style=\"margin: 0; font-size: 12px; color: #9E9188;\">Lead enregistré dans Google Sheets · Simulateur propulsé par <a href=\"https://paktiz.fr\" style=\"color: #8B6B45; text-decoration: none;\">Paktiz</a></p>\n    </div>\n  </div>\n</body></html>",
+                  "attachments": [],
+                  "customHeaders": {}
+                },
+                "propertySettings": {
+                  "to": { "type": "MANUAL" }, "cc": { "type": "MANUAL" }, "bcc": { "type": "MANUAL" },
+                  "auth": { "type": "MANUAL" }, "body": { "type": "MANUAL" }, "from": { "type": "MANUAL" },
+                  "replyTo": { "type": "MANUAL" }, "subject": { "type": "MANUAL" },
+                  "body_type": { "type": "MANUAL" }, "senderName": { "type": "MANUAL" },
+                  "attachments": { "type": "MANUAL" }, "customHeaders": { "type": "MANUAL" }
+                },
+                "errorHandlingOptions": {
+                  "retryOnFailure": { "value": true },
+                  "continueOnFailure": { "value": false }
+                }
+              },
+              "nextAction": {
+                "name": "step_4",
+                "skip": false,
+                "type": "PIECE",
+                "valid": true,
+                "displayName": "Confirmation email au lead",
+                "lastUpdatedDate": "2026-06-22T00:00:00.000Z",
+                "settings": {
+                  "pieceName": "@activepieces/piece-smtp",
+                  "actionName": "send-email",
+                  "pieceVersion": "0.3.12",
+                  "sampleData": {},
+                  "input": {
+                    "auth": "{{connections['KjJDiOyNMh3TXw8HF9VFz']}}",
+                    "to": ["{{trigger['body']['email']}}"],
+                    "cc": [],
+                    "bcc": [],
+                    "from": "contact@balinaisa.com",
+                    "replyTo": "contact@balinaisa.com",
+                    "senderName": "Balinaisa",
+                    "subject": "Votre simulation Balinaisa — {{step_2['product']}} ×{{step_2['qty']}}",
+                    "body_type": "html",
+                    "body": "<!DOCTYPE html><html><body style=\"font-family: Inter, Arial, sans-serif; background: #F3EFE9; padding: 32px; margin: 0;\">\n  <div style=\"max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);\">\n\n    <div style=\"background: #8B6B45; padding: 24px 32px;\">\n      <span style=\"font-size: 20px; font-weight: 700; color: #ffffff;\">Balinaisa</span>\n    </div>\n\n    <div style=\"padding: 36px 32px;\">\n      <p style=\"margin: 0 0 6px; font-size: 24px; font-weight: 600; color: #1A1714; font-family: 'Georgia', serif;\">Merci, {{trigger['body']['name']}} !</p>\n      <p style=\"margin: 0 0 28px; font-size: 15px; color: #6B6058; line-height: 1.7;\">Nous avons bien reçu votre demande de devis. Notre équipe vous contacte sous <strong>24h</strong> pour vous accompagner dans votre projet.</p>\n\n      <!-- Récap simulation -->\n      <div style=\"background: #FAF8F5; border-left: 3px solid #C4975A; border-radius: 0 10px 10px 0; padding: 20px 24px; margin-bottom: 28px;\">\n        <p style=\"margin: 0 0 14px; font-size: 12px; font-weight: 600; color: #9E9188; text-transform: uppercase; letter-spacing: 0.08em;\">Récapitulatif de votre simulation</p>\n        <table style=\"width: 100%; border-collapse: collapse;\">\n          <tr>\n            <td style=\"padding: 5px 0; font-size: 14px; color: #6B6058; width: 50%;\">Meuble sélectionné</td>\n            <td style=\"padding: 5px 0; font-size: 14px; font-weight: 600; color: #1A1714;\">{{step_2['product']}} (teck massif)</td>\n          </tr>\n          <tr>\n            <td style=\"padding: 5px 0; font-size: 14px; color: #6B6058;\">Quantité</td>\n            <td style=\"padding: 5px 0; font-size: 14px; font-weight: 600; color: #1A1714;\">{{step_2['qty']}}</td>\n          </tr>\n          <tr style=\"border-top: 1px solid #E4DDD3;\">\n            <td style=\"padding: 10px 0 5px; font-size: 14px; font-weight: 700; color: #1A1714;\">Estimation TTC</td>\n            <td style=\"padding: 10px 0 5px; font-size: 15px; font-weight: 700; color: #8B6B45;\">{{step_2['total_ttc']}}</td>\n          </tr>\n        </table>\n      </div>\n\n      <p style=\"margin: 0 0 24px; font-size: 14px; color: #6B6058; line-height: 1.7;\">Vous pouvez également nous joindre directement :</p>\n      <table style=\"width: 100%; border-collapse: collapse; margin-bottom: 32px;\">\n        <tr>\n          <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">📧</td>\n          <td style=\"padding: 6px 0; font-size: 14px;\"><a href=\"mailto:contact@balinaisa.com\" style=\"color: #8B6B45; text-decoration: none;\">contact@balinaisa.com</a></td>\n        </tr>\n        <tr>\n          <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">📞</td>\n          <td style=\"padding: 6px 0; font-size: 14px; color: #1A1714;\">07 45 06 52 16</td>\n        </tr>\n        <tr>\n          <td style=\"padding: 6px 0; font-size: 14px; color: #6B6058;\">📍</td>\n          <td style=\"padding: 6px 0; font-size: 14px; color: #1A1714;\">370 Av. de l'Aérodrome, 33260 La Teste-de-Buch</td>\n        </tr>\n      </table>\n\n      <a href=\"https://balinaisa.com\" style=\"display: inline-block; background: #8B6B45; color: #ffffff; padding: 13px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;\">Découvrir notre catalogue →</a>\n    </div>\n\n    <div style=\"background: #FAF8F5; padding: 14px 32px; border-top: 1px solid #E4DDD3;\">\n      <p style=\"margin: 0; font-size: 12px; color: #9E9188;\">© 2026 Balinaisa · La Teste-de-Buch · Mobilier en teck massif artisanal</p>\n    </div>\n  </div>\n</body></html>",
+                    "attachments": [],
+                    "customHeaders": {}
+                  },
+                  "propertySettings": {
+                    "to": { "type": "MANUAL" }, "cc": { "type": "MANUAL" }, "bcc": { "type": "MANUAL" },
+                    "auth": { "type": "MANUAL" }, "body": { "type": "MANUAL" }, "from": { "type": "MANUAL" },
+                    "replyTo": { "type": "MANUAL" }, "subject": { "type": "MANUAL" },
+                    "body_type": { "type": "MANUAL" }, "senderName": { "type": "MANUAL" },
+                    "attachments": { "type": "MANUAL" }, "customHeaders": { "type": "MANUAL" }
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": { "value": true },
+                    "continueOnFailure": { "value": false }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_5",
+                  "skip": false,
+                  "type": "PIECE",
+                  "valid": true,
+                  "displayName": "Enregistrer lead dans Google Sheets",
+                  "lastUpdatedDate": "2026-06-22T00:00:00.000Z",
+                  "settings": {
+                    "pieceName": "@activepieces/piece-google-sheets",
+                    "actionName": "insert_row",
+                    "pieceVersion": "0.14.6",
+                    "sampleData": {},
+                    "input": {
+                      "auth": "{{connections['JIQ0xAUrbvUp4XmRjnbJ2']}}",
+                      "spreadsheetId": "BALINAISA_SHEETS_ID",
+                      "sheetId": 0,
+                      "first_row_headers": true,
+                      "as_string": false,
+                      "includeTeamDrives": false,
+                      "values": {
+                        "A": "{{step_1['date']}}",
+                        "B": "{{step_1['time']}}",
+                        "C": "{{trigger['body']['name']}}",
+                        "D": "{{trigger['body']['email']}}",
+                        "E": "{{trigger['body']['phone']}}",
+                        "F": "{{step_2['product']}}",
+                        "G": "{{step_2['qty']}}",
+                        "H": "{{step_2['unit_price_ht']}}",
+                        "I": "{{step_2['total_ttc']}}",
+                        "J": "{{trigger['body']['message']}}",
+                        "K": "simulateur-balinaisa"
+                      }
+                    },
+                    "propertySettings": {
+                      "values": {
+                        "type": "MANUAL",
+                        "schema": {
+                          "A": { "type": "SHORT_TEXT", "required": false, "displayName": "Date",           "defaultValue": "" },
+                          "B": { "type": "SHORT_TEXT", "required": false, "displayName": "Heure",          "defaultValue": "" },
+                          "C": { "type": "SHORT_TEXT", "required": false, "displayName": "Nom",            "defaultValue": "" },
+                          "D": { "type": "SHORT_TEXT", "required": false, "displayName": "Email",          "defaultValue": "" },
+                          "E": { "type": "SHORT_TEXT", "required": false, "displayName": "Téléphone",      "defaultValue": "" },
+                          "F": { "type": "SHORT_TEXT", "required": false, "displayName": "Produit",        "defaultValue": "" },
+                          "G": { "type": "SHORT_TEXT", "required": false, "displayName": "Quantité",       "defaultValue": "" },
+                          "H": { "type": "SHORT_TEXT", "required": false, "displayName": "Prix unit. HT",  "defaultValue": "" },
+                          "I": { "type": "SHORT_TEXT", "required": false, "displayName": "Total TTC",      "defaultValue": "" },
+                          "J": { "type": "SHORT_TEXT", "required": false, "displayName": "Message",        "defaultValue": "" },
+                          "K": { "type": "SHORT_TEXT", "required": false, "displayName": "Source",         "defaultValue": "" }
+                        }
+                      },
+                      "sheetId":           { "type": "MANUAL" },
+                      "as_string":         { "type": "MANUAL" },
+                      "spreadsheetId":     { "type": "MANUAL" },
+                      "first_row_headers": { "type": "MANUAL" },
+                      "includeTeamDrives": { "type": "MANUAL" }
+                    },
+                    "errorHandlingOptions": {
+                      "retryOnFailure": { "value": true },
+                      "continueOnFailure": { "value": false }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "lastUpdatedDate": "2026-06-22T00:00:00.000Z"
+      },
+      "valid": true,
+      "schemaVersion": "18",
+      "notes": []
+    }
+  ],
+  "status": "PUBLISHED"
+}

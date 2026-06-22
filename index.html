@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulateur d'intérieur — Balinaisa</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <a href="https://balinaisa.com" class="header-logo" target="_blank" rel="noopener">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="6" fill="#8B6B45"/>
+        <path d="M7 20V8l7 4 7-4v12" stroke="#FAF8F5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Balinaisa</span>
+    </a>
+    <div class="header-badge">Simulateur IA <span class="badge-dot"></span> Beta</div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Visualisez avant d'acheter</p>
+      <h1 class="hero-title">Votre intérieur, <em>sublimé</em><br>par le teck Balinaisa</h1>
+      <p class="hero-sub">Uploadez une photo de votre pièce, choisissez un meuble dans notre catalogue.<br>L'IA génère le rendu en quelques secondes.</p>
+      <button class="btn-primary btn-lg" onclick="startSimulator()">
+        Commencer la simulation
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+      <p class="hero-note">Gratuit · Sans inscription · Résultat en ~20 secondes</p>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-mockup">
+        <div class="mockup-room">
+          <div class="mockup-furniture"></div>
+          <div class="mockup-label">Votre pièce</div>
+        </div>
+        <div class="mockup-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="mockup-room mockup-room--after">
+          <div class="mockup-furniture mockup-furniture--teck"></div>
+          <div class="mockup-label">Avec Balinaisa</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIMULATOR (hidden by default) -->
+  <section class="simulator hidden" id="simulator">
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- STEP INDICATORS -->
+    <div class="steps-nav" id="steps-nav">
+      <div class="step-item active" data-step="1">
+        <div class="step-dot">1</div>
+        <span>Photo</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-step="2">
+        <div class="step-dot">2</div>
+        <span>Meuble</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-step="3">
+        <div class="step-dot">3</div>
+        <span>Génération</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-step="4">
+        <div class="step-dot">4</div>
+        <span>Devis</span>
+      </div>
+    </div>
+
+    <!-- STEP 1 — Upload photo -->
+    <div class="step-panel active" id="step-1">
+      <div class="step-header">
+        <h2 class="step-title">Uploadez une photo de votre pièce</h2>
+        <p class="step-desc">JPG ou PNG · max 10 Mo · vue d'ensemble de la pièce recommandée</p>
+      </div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-zone-inner" id="upload-zone-inner">
+          <div class="upload-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <p class="upload-main">Glissez votre photo ici</p>
+          <p class="upload-sub">ou cliquez pour sélectionner</p>
+        </div>
+        <img id="preview-img" class="hidden" alt="Aperçu de votre pièce">
+      </div>
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+      <div class="upload-tips">
+        <div class="tip"><span class="tip-icon">✓</span> Vue d'ensemble de la pièce</div>
+        <div class="tip"><span class="tip-icon">✓</span> Bonne luminosité</div>
+        <div class="tip"><span class="tip-icon">✓</span> Espace visible pour un meuble</div>
+      </div>
+      <div class="step-actions">
+        <button class="btn-primary" id="btn-step1-next" onclick="goToStep(2)" disabled>
+          Choisir un meuble
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2 — Select product -->
+    <div class="step-panel hidden" id="step-2">
+      <div class="step-header">
+        <h2 class="step-title">Choisissez un meuble</h2>
+        <p class="step-desc">Sélectionnez la pièce que vous souhaitez visualiser dans votre intérieur</p>
+      </div>
+
+      <div class="catalog-filters" id="catalog-filters">
+        <button class="filter-btn active" onclick="filterCatalog('all', this)">Tout</button>
+        <button class="filter-btn" onclick="filterCatalog('chaise', this)">Chaises</button>
+        <button class="filter-btn" onclick="filterCatalog('fauteuil', this)">Fauteuils</button>
+        <button class="filter-btn" onclick="filterCatalog('table', this)">Tables</button>
+        <button class="filter-btn" onclick="filterCatalog('bain-soleil', this)">Bains de soleil</button>
+      </div>
+
+      <div class="catalog-grid" id="catalog-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-ghost" onclick="goToStep(1)">← Retour</button>
+        <button class="btn-primary" id="btn-step2-next" onclick="goToStep(3)" disabled>
+          Générer le rendu
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3 — Generation -->
+    <div class="step-panel hidden" id="step-3">
+      <div class="generation-wrap">
+        <div class="gen-animation" id="gen-animation">
+          <div class="gen-ring"></div>
+          <div class="gen-ring gen-ring--2"></div>
+          <div class="gen-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+        </div>
+        <h2 class="gen-title" id="gen-title">Analyse de votre pièce…</h2>
+        <p class="gen-sub" id="gen-sub">L'IA identifie la perspective et la luminosité</p>
+        <div class="gen-progress">
+          <div class="gen-progress-bar" id="gen-progress-bar"></div>
+        </div>
+        <div class="gen-steps" id="gen-steps">
+          <div class="gen-step active" id="gs-1">Analyse de la pièce</div>
+          <div class="gen-step" id="gs-2">Placement du meuble</div>
+          <div class="gen-step" id="gs-3">Rendu des matières</div>
+          <div class="gen-step" id="gs-4">Finalisation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 — Result + quote -->
+    <div class="step-panel hidden" id="step-4">
+      <div class="result-wrap">
+        <div class="result-header">
+          <h2 class="step-title">Votre simulation est prête</h2>
+          <p class="step-desc">Voici comment <span id="result-product-name">ce meuble</span> s'intègre dans votre intérieur</p>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-visual">
+            <div class="result-tabs">
+              <button class="result-tab active" onclick="switchResultTab('after', this)">Après</button>
+              <button class="result-tab" onclick="switchResultTab('before', this)">Avant</button>
+            </div>
+            <div class="result-image-wrap">
+              <img id="result-after" class="result-img active" alt="Simulation avec meuble Balinaisa">
+              <img id="result-before" class="result-img hidden" alt="Photo originale">
+              <div class="result-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Rendu IA
+              </div>
+            </div>
+            <div class="result-actions-img">
+              <button class="btn-ghost btn-sm" onclick="downloadResult()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Télécharger
+              </button>
+              <button class="btn-ghost btn-sm" onclick="retrySimulation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                Réessayer
+              </button>
+            </div>
+          </div>
+
+          <div class="result-quote">
+            <div class="quote-card">
+              <div class="quote-header">
+                <span class="quote-label">Devis estimatif</span>
+                <span class="quote-tag" id="quote-tag">Chaise</span>
+              </div>
+              <div class="quote-product">
+                <div class="quote-product-img" id="quote-product-img"></div>
+                <div class="quote-product-info">
+                  <p class="quote-product-name" id="quote-product-name">Joko</p>
+                  <p class="quote-product-mat">Teck massif</p>
+                </div>
+              </div>
+
+              <div class="quote-qty-row">
+                <span class="quote-qty-label">Quantité</span>
+                <div class="qty-control">
+                  <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                  <span class="qty-val" id="qty-val">1</span>
+                  <button class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+              </div>
+
+              <div class="quote-lines">
+                <div class="quote-line">
+                  <span>Prix unitaire</span>
+                  <span id="quote-unit-price">279,00 €</span>
+                </div>
+                <div class="quote-line" id="quote-discount-line" style="display:none">
+                  <span class="quote-discount-label">Remise pack (≥4)</span>
+                  <span class="quote-discount-val" id="quote-discount">−0,00 €</span>
+                </div>
+                <div class="quote-line">
+                  <span>Total HT</span>
+                  <span id="quote-ht">279,00 €</span>
+                </div>
+                <div class="quote-line">
+                  <span>TVA 20%</span>
+                  <span id="quote-tva">55,80 €</span>
+                </div>
+                <div class="quote-line quote-line--total">
+                  <span>Total TTC</span>
+                  <span id="quote-ttc">334,80 €</span>
+                </div>
+              </div>
+
+              <div class="quote-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Devis indicatif — prix définitif sur demande
+              </div>
+            </div>
+
+            <div class="contact-card" id="contact-form-wrap">
+              <h3 class="contact-title">Obtenir un devis officiel</h3>
+              <p class="contact-sub">Notre équipe vous contacte sous 24h</p>
+              <form id="contact-form" onsubmit="submitForm(event)">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="f-name">Prénom & Nom</label>
+                    <input type="text" id="f-name" placeholder="Marie Dupont" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="f-email">Email</label>
+                    <input type="email" id="f-email" placeholder="marie@exemple.fr" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="f-phone">Téléphone</label>
+                    <input type="tel" id="f-phone" placeholder="06 XX XX XX XX">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="f-message">Message (optionnel)</label>
+                  <textarea id="f-message" rows="2" placeholder="Questions, délais, livraison…"></textarea>
+                </div>
+                <label class="checkbox-row">
+                  <input type="checkbox" id="f-consent" required>
+                  <span>J'accepte que Balinaisa me contacte au sujet de ma simulation</span>
+                </label>
+                <button type="submit" class="btn-primary btn-full">
+                  Envoyer ma demande de devis
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </form>
+              <div class="form-success hidden" id="form-success">
+                <div class="success-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h3>Demande envoyée !</h3>
+                <p>L'équipe Balinaisa vous contacte sous 24h.<br>Un récapitulatif a été envoyé à votre adresse email.</p>
+                <button class="btn-ghost btn-sm" onclick="resetSimulator()">Faire une nouvelle simulation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>© 2026 Balinaisa · <a href="https://balinaisa.com" target="_blank" rel="noopener">balinaisa.com</a></p>
+      <p class="footer-sub">Simulation propulsée par <a href="https://paktiz.fr" target="_blank" rel="noopener">Paktiz</a></p>
+    </div>
+  </footer>
+
+  <script src="simulator.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "balinaisa-sim",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "3456", "/tmp/balinaisa-pz"],
+      "port": 3456
+    }
+  ]
+}

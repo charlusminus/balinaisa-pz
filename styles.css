@@ -352,6 +352,32 @@ input, textarea, select { font-family: var(--font-sans); }
 .btn-ghost.btn-sm { padding: 7px 12px; font-size: 13px; }
 
 /* =============================================
+   SIMULATOR TOP BAR (back button)
+   ============================================= */
+.sim-topbar {
+  padding: 10px 2rem 0;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.btn-back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--transition);
+}
+
+.btn-back-home:hover { color: var(--primary); }
+
+/* =============================================
    PROGRESS BAR (top of simulator)
    ============================================= */
 .progress-bar-wrap {

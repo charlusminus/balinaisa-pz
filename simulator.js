@@ -20,7 +20,7 @@ const CATALOG = [
 const LABEL = { chaise: 'Chaise', fauteuil: 'Fauteuil', table: 'Table', 'bain-soleil': 'Bain de soleil' };
 
 const GEN_STEPS = [
-  { title: 'Analyse de votre pièce…',       sub: "L'IA identifie la perspective et la luminosité",        pct: 20 },
+  { title: 'Analyse de votre espace…',       sub: "L'IA identifie la perspective et la luminosité",        pct: 20 },
   { title: 'Placement du meuble…',           sub: 'Calcul de l\'angle et de l\'échelle',                   pct: 50 },
   { title: 'Rendu des matières teck…',       sub: 'Application des textures bois et finitions',            pct: 80 },
   { title: 'Finalisation du rendu…',         sub: 'Harmonisation des couleurs et ombres',                  pct: 95 },
@@ -39,8 +39,16 @@ let qty = 1;
 function startSimulator() {
   document.getElementById('hero').classList.add('hidden');
   document.getElementById('simulator').classList.remove('hidden');
+  document.getElementById('cta-widget').classList.add('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   renderCatalog('all');
+}
+
+function backToHome() {
+  document.getElementById('simulator').classList.add('hidden');
+  document.getElementById('hero').classList.remove('hidden');
+  document.getElementById('cta-widget').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* =============================================

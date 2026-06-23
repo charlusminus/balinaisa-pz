@@ -19,12 +19,7 @@ const CATALOG = [
 
 const LABEL = { chaise: 'Chaise', fauteuil: 'Fauteuil', table: 'Table', 'bain-soleil': 'Bain de soleil' };
 
-const GEN_STEPS = [
-  { title: 'Analyse de votre espace…',       sub: "L'IA identifie la perspective et la luminosité",        pct: 20 },
-  { title: 'Placement du meuble…',           sub: 'Calcul de l\'angle et de l\'échelle',                   pct: 50 },
-  { title: 'Rendu des matières teck…',       sub: 'Application des textures bois et finitions',            pct: 80 },
-  { title: 'Finalisation du rendu…',         sub: 'Harmonisation des couleurs et ombres',                  pct: 95 },
-];
+const WEBHOOK_URL = 'https://cloud.activepieces.com/api/v1/webhooks/vBqWuW1eudqSQG4eFkacG';
 
 // State
 let currentStep = 0;
@@ -34,7 +29,7 @@ let selectedProduct = null;
 let qty = 1;
 
 /* =============================================
-   HERO → START
+   HERO ↔ SIMULATOR
    ============================================= */
 function startSimulator() {
   document.getElementById('hero').classList.add('hidden');
@@ -49,6 +44,15 @@ function backToHome() {
   document.getElementById('hero').classList.remove('hidden');
   document.getElementById('cta-widget').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function widgetClick() {
+  const hero = document.getElementById('hero');
+  if (!hero.classList.contains('hidden')) {
+    startSimulator();
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 /* =============================================
@@ -132,6 +136,8 @@ function selectProduct(id) {
   document.querySelectorAll('.catalog-card').forEach(c => c.classList.remove('selected'));
   document.querySelector(`[onclick="selectProduct('${id}')"]`)?.classList.add('selected');
   document.getElementById('btn-step2-next').disabled = false;
+  document.getElementById('qty-val').textContent = qty;
+  document.getElementById('catalog-qty-row').classList.remove('hidden');
 }
 
 /* =============================================
@@ -144,8 +150,7 @@ function goToStep(step) {
   updateProgressBar(step);
   currentStep = step;
 
-  if (step === 3) runGeneration();
-  if (step === 4) renderResult();
+  if (step === 3) populateLeadForm();
 
   window.scrollTo({ top: 60, behavior: 'smooth' });
 }
@@ -165,169 +170,72 @@ function updateProgressBar(step) {
 }
 
 /* =============================================
-   GENERATION ANIMATION
+   QTY
    ============================================= */
-function runGeneration() {
-  const bar = document.getElementById('gen-progress-bar');
-  const title = document.getElementById('gen-title');
-  const sub = document.getElementById('gen-sub');
-  const stepEls = ['gs-1','gs-2','gs-3','gs-4'].map(id => document.getElementById(id));
-  stepEls.forEach(el => { el.classList.remove('active','done'); });
-
-  let phase = 0;
-  let progress = 0;
-
-  const TIMING = [2200, 2500, 2800, 1800]; // ms per phase
-
-  function advancePhase() {
-    if (phase >= GEN_STEPS.length) {
-      goToStep(4);
-      return;
-    }
-    const s = GEN_STEPS[phase];
-    title.textContent = s.title;
-    sub.textContent = s.sub;
-
-    stepEls.forEach((el, i) => {
-      el.classList.remove('active','done');
-      if (i < phase) el.classList.add('done');
-      else if (i === phase) el.classList.add('active');
-    });
-
-    animateBar(progress, s.pct, TIMING[phase] * 0.8);
-    progress = s.pct;
-    phase++;
-    setTimeout(advancePhase, TIMING[phase - 1]);
-  }
-
-  advancePhase();
-}
-
-function animateBar(from, to, duration) {
-  const bar = document.getElementById('gen-progress-bar');
-  const start = performance.now();
-  function step(now) {
-    const t = Math.min((now - start) / duration, 1);
-    const val = from + (to - from) * easeOut(t);
-    bar.style.width = val.toFixed(1) + '%';
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-
-/* =============================================
-   RESULT
-   ============================================= */
-function renderResult() {
-  const p = selectedProduct;
-  if (!p) return;
-
-  // Images
-  const beforeImg = document.getElementById('result-before');
-  const afterImg = document.getElementById('result-after');
-  beforeImg.src = uploadedDataURL || '';
-
-  // Simulate a "generated" result by compositing: just use original for now
-  // (placeholder until real API is connected)
-  afterImg.src = uploadedDataURL || '';
-  afterImg.style.filter = 'sepia(0.15) saturate(1.1)';
-
-  // Quote
-  document.getElementById('result-product-name').textContent = p.name;
-  document.getElementById('quote-product-name').textContent = p.name;
-  document.getElementById('quote-tag').textContent = LABEL[p.cat] || p.cat;
-  document.getElementById('quote-product-img').style.background =
-    `linear-gradient(135deg, ${p.color}33, ${p.color}66)`;
-
-  qty = 1;
-  updateQuote();
-}
-
-function updateQuote() {
-  const p = selectedProduct;
-  if (!p) return;
-  const unitPrice = p.price;
-  const hasDiscount = qty >= 4;
-  const discountRate = 0.1;
-  const discountAmt = hasDiscount ? unitPrice * qty * discountRate : 0;
-  const ht = unitPrice * qty - discountAmt;
-  const tva = ht * 0.20;
-  const ttc = ht + tva;
-
-  document.getElementById('qty-val').textContent = qty;
-  document.getElementById('quote-unit-price').textContent = fmt(unitPrice);
-  document.getElementById('quote-ht').textContent = fmt(ht);
-  document.getElementById('quote-tva').textContent = fmt(tva);
-  document.getElementById('quote-ttc').textContent = fmt(ttc);
-
-  const discountLine = document.getElementById('quote-discount-line');
-  if (hasDiscount) {
-    discountLine.style.display = 'flex';
-    document.getElementById('quote-discount').textContent = '−' + fmt(discountAmt);
-  } else {
-    discountLine.style.display = 'none';
-  }
-}
-
 function changeQty(delta) {
   qty = Math.max(1, Math.min(20, qty + delta));
-  updateQuote();
+  document.getElementById('qty-val').textContent = qty;
 }
 
 function fmt(n) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 }
 
-function switchResultTab(tab, btn) {
-  document.querySelectorAll('.result-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const after = document.getElementById('result-after');
-  const before = document.getElementById('result-before');
-  if (tab === 'after') {
-    after.classList.replace('hidden','active');
-    before.classList.replace('active','hidden');
-  } else {
-    before.classList.replace('hidden','active');
-    after.classList.replace('active','hidden');
-  }
-}
-
-function downloadResult() {
-  const img = document.getElementById('result-after');
-  const a = document.createElement('a');
-  a.href = img.src;
-  a.download = `balinaisa-simulation-${selectedProduct?.id || 'rendu'}.jpg`;
-  a.click();
-}
-
-function retrySimulation() {
-  goToStep(2);
-}
-
 /* =============================================
-   CONTACT FORM
+   STEP 3 — LEAD FORM
    ============================================= */
-async function submitForm(e) {
+function populateLeadForm() {
+  const p = selectedProduct;
+  if (!p) return;
+  const recap = document.getElementById('lead-product-recap');
+  recap.innerHTML = `
+    <div class="lead-recap-card">
+      <div class="lead-recap-img" style="background: linear-gradient(135deg, ${p.color}22, ${p.color}44);">
+        <svg width="40" height="30" viewBox="0 0 56 42" fill="none">
+          <rect x="4" y="18" width="48" height="14" rx="3" fill="${p.color}" opacity="0.8"/>
+          <rect x="8" y="10" width="40" height="10" rx="2" fill="${p.color}"/>
+          <rect x="8" y="32" width="6" height="8" rx="1" fill="${p.color}" opacity="0.7"/>
+          <rect x="42" y="32" width="6" height="8" rx="1" fill="${p.color}" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="lead-recap-info">
+        <p class="lead-recap-name">${p.name}</p>
+        <p class="lead-recap-mat">Teck massif · ${LABEL[p.cat] || p.cat}</p>
+        <p class="lead-recap-price">${fmt(p.price)} / unité · <strong>Qté : ${qty}</strong></p>
+      </div>
+      <div class="lead-recap-photo">
+        <img src="${uploadedDataURL}" alt="Votre espace">
+        <span>Votre espace</span>
+      </div>
+    </div>
+  `;
+}
+
+async function submitLead(e) {
   e.preventDefault();
-  const btn = e.target.querySelector('button[type="submit"]');
+  const btn = document.getElementById('btn-submit-lead');
   btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  btn.innerHTML = '<span>Envoi en cours…</span>';
+
+  const firstName = document.getElementById('f-firstname').value.trim();
+  const lastName  = document.getElementById('f-lastname').value.trim();
 
   const payload = {
-    name:    document.getElementById('f-name').value,
-    email:   document.getElementById('f-email').value,
-    phone:   document.getElementById('f-phone').value,
-    message: document.getElementById('f-message').value,
-    product: selectedProduct?.name,
+    first_name:       firstName,
+    last_name:        lastName,
+    name:             `${firstName} ${lastName}`,
+    email:            document.getElementById('f-email').value.trim(),
+    phone:            document.getElementById('f-phone').value.trim(),
+    intent:           document.getElementById('f-intent').value,
+    product:          selectedProduct?.name,
+    product_id:       selectedProduct?.id,
+    product_cat:      selectedProduct?.cat,
+    product_price_ht: selectedProduct?.price,
     qty,
-    price_ttc: selectedProduct ? (selectedProduct.price * qty * 1.2).toFixed(2) : null,
-    source: 'simulateur-balinaisa',
+    price_ttc:        selectedProduct ? (selectedProduct.price * qty * 1.2).toFixed(2) : null,
+    photo_base64:     uploadedDataURL,
+    source:           'simulateur-balinaisa',
   };
-
-  // TODO: replace with Activepieces webhook URL
-  const WEBHOOK_URL = 'https://cloud.activepieces.com/api/v1/webhooks/vBqWuW1eudqSQG4eFkacG';
 
   try {
     await fetch(WEBHOOK_URL, {
@@ -336,12 +244,9 @@ async function submitForm(e) {
       body: JSON.stringify(payload),
       mode: 'no-cors',
     });
-  } catch (_) {
-    // no-cors: always "succeeds" silently
-  }
+  } catch (_) {}
 
-  document.getElementById('contact-form').classList.add('hidden');
-  document.getElementById('form-success').classList.remove('hidden');
+  goToStep(4);
 }
 
 /* =============================================
@@ -359,10 +264,16 @@ function resetSimulator() {
   document.getElementById('upload-zone').classList.remove('has-file');
   document.getElementById('btn-step1-next').disabled = true;
   document.getElementById('btn-step2-next').disabled = true;
-  document.getElementById('contact-form').classList.remove('hidden');
-  document.getElementById('form-success').classList.add('hidden');
-  document.getElementById('contact-form').reset();
-  document.getElementById('gen-progress-bar').style.width = '0%';
+  document.getElementById('catalog-qty-row').classList.add('hidden');
+
+  const form = document.getElementById('lead-form');
+  if (form) form.reset();
+  const btn = document.getElementById('btn-submit-lead');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = `Lancer ma simulation gratuite
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`;
+  }
 
   renderCatalog('all');
   goToStep(1);

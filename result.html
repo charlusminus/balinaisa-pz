@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votre simulation Balinaisa</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #F2ECE3;
+      --primary: #B87D4B;
+      --accent: #C4975A;
+      --text: #2A1F14;
+      --muted: #7A6A58;
+      --border: #DDD5C8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header { background: var(--primary); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .header-brand { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -.02em; }
+    .header-sub { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+    .main { max-width: 1000px; margin: 0 auto; padding: 52px 24px 80px; }
+    .greeting { font-family: Georgia, serif; font-size: 30px; font-weight: 400; margin-bottom: 6px; }
+    .greeting-sub { font-size: 15px; color: var(--muted); margin-bottom: 40px; line-height: 1.6; }
+
+    .result-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+    @media (max-width: 760px) { .result-grid { grid-template-columns: 1fr; } }
+
+    /* Simulation card */
+    .sim-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.07); }
+    .sim-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+    .sim-placeholder {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #EAE2D8 0%, #DDD5C8 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    }
+    .sim-placeholder-icon {
+      width: 80px; height: 80px; background: rgba(184,125,75,.15); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sim-placeholder-text { font-size: 14px; color: var(--muted); text-align: center; padding: 0 32px; line-height: 1.65; }
+    .sim-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .sim-badge {
+      display: inline-flex; align-items: center;
+      background: #FBF4E8; border: 1px solid var(--accent); color: var(--primary);
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+    .sim-badge-pending {
+      background: #F2ECE3; border-color: var(--border); color: var(--muted);
+    }
+    .sim-foot-label { font-size: 12px; color: var(--muted); }
+
+    /* Devis card */
+    .devis-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.07); }
+    .devis-head { background: var(--bg); padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    .devis-head-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+    .devis-product-name { font-size: 20px; font-weight: 600; }
+    .devis-product-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    .devis-body { padding: 20px 22px; }
+    .devis-row { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #F0EBE4; }
+    .devis-row:last-of-type { border: none; }
+    .devis-row-label { color: var(--muted); }
+    .devis-row-val { font-weight: 500; }
+    .devis-total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 6px; border-top: 2px solid var(--border); margin-top: 4px; }
+    .devis-total-label { font-size: 15px; font-weight: 700; }
+    .devis-total-price { font-size: 24px; font-weight: 700; color: var(--primary); }
+
+    .devis-intent { margin-top: 14px; padding: 10px 14px; background: #FBF4E8; border-radius: 8px; font-size: 13px; color: var(--muted); }
+    .devis-intent strong { color: var(--primary); }
+    .discount-tag {
+      display: inline-flex; align-items: center; margin-top: 10px;
+      background: #E8F5E8; border: 1px solid #7CB87C; color: #2A6A2A;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+
+    .devis-actions { padding: 16px 22px 22px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .btn-cta { display: block; background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 9px; text-decoration: none; font-size: 14px; font-weight: 600; text-align: center; }
+    .btn-outline { display: block; color: var(--primary); padding: 11px 20px; border-radius: 9px; border: 1.5px solid var(--accent); text-decoration: none; font-size: 14px; font-weight: 500; text-align: center; }
+
+    .footer { padding: 22px 24px; text-align: center; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); margin-top: 48px; }
+    .footer a { color: var(--primary); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="header-brand">Balinaisa</div>
+    <div class="header-sub">Mobilier en teck massif artisanal</div>
+  </div>
+</header>
+
+<main class="main">
+  <h1 class="greeting" id="greeting">Bonjour !</h1>
+  <p class="greeting-sub" id="greeting-sub">Voici votre simulation personnalisée et votre devis estimatif.</p>
+
+  <div class="result-grid">
+
+    <!-- Simulation image -->
+    <div class="sim-card">
+      <div id="sim-img-wrap"></div>
+      <div class="sim-foot">
+        <span id="sim-badge-el"></span>
+        <span class="sim-foot-label" id="sim-foot-label"></span>
+      </div>
+    </div>
+
+    <!-- Devis -->
+    <div class="devis-card">
+      <div class="devis-head">
+        <div class="devis-head-label">Votre devis</div>
+        <div class="devis-product-name" id="dv-product">—</div>
+        <div class="devis-product-sub">Teck massif artisanal · Finition huilée</div>
+      </div>
+      <div class="devis-body">
+        <div class="devis-row"><span class="devis-row-label">Quantité</span><span class="devis-row-val" id="dv-qty">—</span></div>
+        <div class="devis-row"><span class="devis-row-label">Total HT</span><span class="devis-row-val" id="dv-ht">—</span></div>
+        <div class="devis-row"><span class="devis-row-label">TVA 20%</span><span class="devis-row-val" id="dv-tva">—</span></div>
+        <div class="devis-total-row">
+          <span class="devis-total-label">Total TTC</span>
+          <span class="devis-total-price" id="dv-ttc">—</span>
+        </div>
+        <div id="dv-discount" style="display:none" class="discount-tag">Remise pack ×4 appliquée (−10%)</div>
+        <div class="devis-intent" id="dv-intent" style="display:none">
+          Horizon d'achat : <strong id="dv-intent-val">—</strong>
+        </div>
+      </div>
+      <div class="devis-actions">
+        <a href="mailto:contact@balinaisa.com?subject=Suite simulation" class="btn-cta">Contacter Balinaisa →</a>
+        <a href="https://balinaisa.com" class="btn-outline">Voir le catalogue</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <p>Balinaisa · 370 Av. de l'Aérodrome, 33260 La Teste-de-Buch · 07 45 06 52 16</p>
+  <p style="margin-top:6px"><a href="https://balinaisa.com">balinaisa.com</a> · <a href="mailto:contact@balinaisa.com">contact@balinaisa.com</a></p>
+</footer>
+
+<script>
+const CATALOG_COLORS = {
+  joko:'#C4975A',aruna:'#B8895A',dune:'#D4A96A',nara:'#C09050',lisa:'#B87848',sari:'#D0A870',
+  luma:'#9A7050',ananda:'#A87850',andini:'#C8A878',padma:'#BC9060',kinanti:'#D4A060',indra:'#8B6030'
+};
+
+const p = new URLSearchParams(window.location.search);
+const firstName   = p.get('n') || '';
+const productName = p.get('pn') || 'Produit';
+const productId   = p.get('pid') || '';
+const qty         = parseInt(p.get('q')) || 1;
+const ttcRaw      = parseFloat(p.get('ttc')) || 0;
+const htRaw       = parseFloat(p.get('ht')) || 0;
+const tvaRaw      = ttcRaw - htRaw;
+const intentLabel = p.get('il') || '';
+const imgUrl      = p.get('img') || '';
+const hasDiscount = p.get('disc') === '1';
+
+const eur = (n) => n.toLocaleString('fr-FR', {minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+
+// Greeting
+document.getElementById('greeting').textContent = firstName ? `Bonjour, ${firstName} !` : 'Votre simulation Balinaisa';
+if (firstName) {
+  document.getElementById('greeting-sub').textContent = `Voici votre simulation personnalisée${productName ? ' — ' + productName : ''} et votre devis estimatif.`;
+}
+
+// Devis
+document.getElementById('dv-product').textContent = productName;
+document.getElementById('dv-qty').textContent = qty;
+document.getElementById('dv-ht').textContent = eur(htRaw);
+document.getElementById('dv-tva').textContent = eur(tvaRaw);
+document.getElementById('dv-ttc').textContent = eur(ttcRaw);
+if (hasDiscount) document.getElementById('dv-discount').style.display = 'inline-flex';
+if (intentLabel) {
+  document.getElementById('dv-intent').style.display = 'block';
+  document.getElementById('dv-intent-val').textContent = intentLabel;
+}
+
+// Simulation image
+const wrap = document.getElementById('sim-img-wrap');
+const col  = CATALOG_COLORS[productId] || '#B87D4B';
+
+if (imgUrl) {
+  wrap.innerHTML = `<img src="${imgUrl}" alt="Simulation ${productName}" class="sim-img">`;
+  document.getElementById('sim-badge-el').outerHTML = `<span class="sim-badge">✦ Simulation personnalisée</span>`;
+  document.getElementById('sim-foot-label').textContent = `${productName} intégré dans votre espace`;
+} else {
+  wrap.innerHTML = `
+    <div class="sim-placeholder">
+      <div class="sim-placeholder-icon">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="1.8">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <div class="sim-placeholder-text">Votre simulation IA<br>sera ajoutée ici par notre équipe</div>
+    </div>`;
+  document.getElementById('sim-badge-el').outerHTML = `<span class="sim-badge sim-badge-pending">En préparation</span>`;
+  document.getElementById('sim-foot-label').textContent = `${productName} — teck massif artisanal`;
+}
+
+document.title = `Simulation ${productName} — Balinaisa`;
+</script>
+</body>
+</html>

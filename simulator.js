@@ -75,15 +75,29 @@ function handleFileUpload(input) {
   uploadedFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    uploadedDataURL = e.target.result;
-    const zone = document.getElementById('upload-zone');
-    const inner = document.getElementById('upload-zone-inner');
-    const preview = document.getElementById('preview-img');
-    inner.classList.add('hidden');
-    preview.src = uploadedDataURL;
-    preview.classList.remove('hidden');
-    zone.classList.add('has-file');
-    document.getElementById('btn-step1-next').disabled = false;
+    const img = new Image();
+    img.onload = () => {
+      const MAX_DIM = 1200;
+      let { width, height } = img;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        if (width >= height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+        else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      uploadedDataURL = canvas.toDataURL('image/jpeg', 0.85);
+
+      const zone = document.getElementById('upload-zone');
+      const inner = document.getElementById('upload-zone-inner');
+      const preview = document.getElementById('preview-img');
+      inner.classList.add('hidden');
+      preview.src = uploadedDataURL;
+      preview.classList.remove('hidden');
+      zone.classList.add('has-file');
+      document.getElementById('btn-step1-next').disabled = false;
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }

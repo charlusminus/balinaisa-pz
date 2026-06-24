@@ -61,6 +61,17 @@ function widgetClick() {
 function handleFileUpload(input) {
   const file = input.files[0];
   if (!file) return;
+
+  const MAX_MB = 8;
+  const errEl = document.getElementById('upload-error');
+  if (file.size > MAX_MB * 1024 * 1024) {
+    errEl.textContent = `Image trop lourde (${(file.size / 1024 / 1024).toFixed(1)} Mo) — max ${MAX_MB} Mo`;
+    errEl.classList.remove('hidden');
+    input.value = '';
+    return;
+  }
+  errEl.classList.add('hidden');
+
   uploadedFile = file;
   const reader = new FileReader();
   reader.onload = e => {

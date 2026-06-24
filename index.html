@@ -39,7 +39,7 @@
         Commencer la simulation
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
-      <p class="hero-note">Gratuit · Sans inscription · Résultat en ~20 secondes</p>
+      <p class="hero-note">Gratuit · Sans inscription · Résultats en boite mail en quelques minutes</p>
     </div>
     <div class="hero-scroll-hint">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -136,20 +136,18 @@
         <!-- Populated by JS -->
       </div>
 
-      <!-- Qty selector (visible after product selection) -->
-      <div class="catalog-qty-row hidden" id="catalog-qty-row">
-        <span class="catalog-qty-label">Quantité souhaitée</span>
-        <div class="qty-control">
-          <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
-          <span class="qty-val" id="qty-val">1</span>
-          <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
-        </div>
-      </div>
-
       <div class="step-actions">
         <button class="btn-ghost" onclick="goToStep(1)">← Retour</button>
+        <div class="qty-inline hidden" id="catalog-qty-row">
+          <span class="qty-inline-label">Quantité</span>
+          <div class="qty-control">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-val" id="qty-val">1</span>
+            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
         <button class="btn-primary" id="btn-step2-next" onclick="goToStep(3)" disabled>
-          Continuer
+          Confirmer
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </div>

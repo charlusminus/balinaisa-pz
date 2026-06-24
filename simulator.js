@@ -220,6 +220,8 @@ async function submitLead(e) {
   const firstName = document.getElementById('f-firstname').value.trim();
   const lastName  = document.getElementById('f-lastname').value.trim();
 
+  // photo_base64 excluded: full-res base64 (3-10 MB) would overflow the AP webhook body
+  // limit and silently wipe all fields. Image handling goes through a separate upload step.
   const payload = {
     first_name:       firstName,
     last_name:        lastName,
@@ -233,7 +235,6 @@ async function submitLead(e) {
     product_price_ht: selectedProduct?.price,
     qty,
     price_ttc:        selectedProduct ? (selectedProduct.price * qty * 1.2).toFixed(2) : null,
-    photo_base64:     uploadedDataURL,
     source:           'simulateur-balinaisa',
   };
 

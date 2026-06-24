@@ -56,11 +56,13 @@
                 "last_name": "{{trigger['output']['body']['last_name']}}",
                 "first_name": "{{trigger['output']['body']['first_name']}}",
                 "product_id": "{{trigger['output']['body']['product_id']}}",
-                "product_price_ht": "{{trigger['output']['body']['product_price_ht']}}"
+                "product_price_ht": "{{trigger['output']['body']['product_price_ht']}}",
+                "email": "{{trigger['output']['body']['email']}}",
+                "phone": "{{trigger['output']['body']['phone']}}"
               },
               "sampleData": {},
               "sourceCode": {
-                "code": "export const code = async (inputs) => {\n  const qty = parseInt(inputs.qty) || 1;\n  const unitPriceHT = parseFloat(inputs.product_price_ht) || 0;\n  const hasDiscount = qty >= 4;\n  const totalHTBefore = unitPriceHT * qty;\n  const discountAmt = hasDiscount ? totalHTBefore * 0.10 : 0;\n  const totalHT = totalHTBefore - discountAmt;\n  const tva = totalHT * 0.20;\n  const totalTTC = totalHT + tva;\n  const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \\u20ac';\n  const intentLabels = { 'now': 'Maintenant', '1-3months': \"D'ici 1 \\u00e0 3 mois\", '3months+': 'Dans 3 mois et plus', 'curious': 'Juste curieux(se)' };\n  const firstName = (inputs.first_name || '').trim();\n  const lastName = (inputs.last_name || '').trim();\n  const intentLabel = intentLabels[inputs.intent] || inputs.intent || 'Non renseign\\u00e9';\n  const product = inputs.product || 'N/A';\n  const productId = inputs.product_id || '';\n  return {\n    qty, product, product_id: productId,\n    unit_price_ht: fmt(unitPriceHT), total_ht: fmt(totalHT), tva: fmt(tva), total_ttc: fmt(totalTTC),\n    has_discount: hasDiscount,\n    discount_label: hasDiscount ? 'Remise pack \\u00d74 appliqu\\u00e9e (\\u221210%)' : '',\n    intent_raw: inputs.intent || '', intent_label: intentLabel,\n    first_name: firstName, last_name: lastName,\n    full_name: [firstName, lastName].filter(Boolean).join(' ')\n  };\n};",
+                "code": "export const code = async (inputs) => {\n  const qty = parseInt(inputs.qty) || 1;\n  const unitPriceHT = parseFloat(inputs.product_price_ht) || 0;\n  const hasDiscount = qty >= 4;\n  const totalHTBefore = unitPriceHT * qty;\n  const discountAmt = hasDiscount ? totalHTBefore * 0.10 : 0;\n  const totalHT = totalHTBefore - discountAmt;\n  const tva = totalHT * 0.20;\n  const totalTTC = totalHT + tva;\n  const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \\u20ac';\n  const intentLabels = { 'now': 'Maintenant', '1-3months': \"D'ici 1 \\u00e0 3 mois\", '3months+': 'Dans 3 mois et plus', 'curious': 'Juste curieux(se)' };\n  const firstName = (inputs.first_name || '').trim();\n  const lastName = (inputs.last_name || '').trim();\n  const intentLabel = intentLabels[inputs.intent] || inputs.intent || 'Non renseign\\u00e9';\n  const product = inputs.product || 'N/A';\n  const productId = inputs.product_id || '';\n  const rawEmail = (inputs.email || '').trim();\n  const phone = (inputs.phone || '').trim();\n  // Fallback to charles.alzon@gmail.com for test runs without payload\n  const emailTo = rawEmail.includes('@') ? rawEmail : 'charles.alzon@gmail.com';\n  return {\n    qty, product, product_id: productId,\n    unit_price_ht: fmt(unitPriceHT), total_ht: fmt(totalHT), tva: fmt(tva), total_ttc: fmt(totalTTC),\n    has_discount: hasDiscount,\n    discount_label: hasDiscount ? 'Remise pack \\u00d74 appliqu\\u00e9e (\\u221210%)' : '',\n    intent_raw: inputs.intent || '', intent_label: intentLabel,\n    first_name: firstName, last_name: lastName,\n    full_name: [firstName, lastName].filter(Boolean).join(' '),\n    email: rawEmail,\n    email_to: emailTo,\n    phone: phone\n  };\n};",
                 "packageJson": "{}"
               },
               "errorHandlingOptions": {
@@ -110,8 +112,8 @@
                       "B": "{{step_1['output']['time']}}",
                       "C": "{{step_2['output']['first_name']}}",
                       "D": "{{step_2['output']['last_name']}}",
-                      "E": "{{trigger['output']['body']['email']}}",
-                      "F": "{{trigger['output']['body']['phone']}}",
+                      "E": "{{step_2['output']['email']}}",
+                      "F": "{{step_2['output']['phone']}}",
                       "G": "{{step_2['output']['intent_label']}}",
                       "H": "{{step_2['output']['product']}}",
                       "I": "{{step_2['output']['product_id']}}",
@@ -291,10 +293,10 @@
                     },
                     "errorHandlingOptions": {
                       "retryOnFailure": {
-                        "value": true
+                        "value": false
                       },
                       "continueOnFailure": {
-                        "value": false
+                        "value": true
                       }
                     }
                   },
@@ -307,7 +309,7 @@
                       "input": {
                         "cc": [],
                         "to": [
-                          "{{trigger['output']['body']['email']}}"
+                          "{{step_2['output']['email_to']}}"
                         ],
                         "bcc": [],
                         "auth": "{{connections['KjJDiOyNMh3TXw8HF9VFz']}}",
@@ -364,10 +366,10 @@
                       },
                       "errorHandlingOptions": {
                         "retryOnFailure": {
-                          "value": true
+                          "value": false
                         },
                         "continueOnFailure": {
-                          "value": false
+                          "value": true
                         }
                       }
                     },

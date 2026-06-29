@@ -103,6 +103,15 @@ function handleFileUpload(input) {
   reader.readAsDataURL(file);
 }
 
+// Show the "Prendre une photo" button only on devices with a camera (mobile/tablet)
+document.addEventListener('DOMContentLoaded', () => {
+  const camBtn = document.getElementById('btn-camera');
+  if (!camBtn) return;
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
+  if (isMobile) camBtn.classList.remove('hidden');
+});
+
 // Drag & drop
 document.addEventListener('DOMContentLoaded', () => {
   const zone = document.getElementById('upload-zone');

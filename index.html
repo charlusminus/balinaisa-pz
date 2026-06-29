@@ -97,18 +97,20 @@
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
           <p class="upload-main">Glissez votre photo ici</p>
-          <p class="upload-sub">ou utilisez les boutons ci-dessous</p>
+          <p class="upload-sub">ou cliquez pour importer</p>
         </div>
         <img id="preview-img" class="hidden" alt="Aperçu de votre pièce">
       </div>
-      <div class="upload-actions">
-        <button type="button" class="btn-camera hidden" id="btn-camera" onclick="event.stopPropagation(); document.getElementById('camera-input').click()">
+      <!-- Boutons d'action : affichés uniquement sur mobile (caméra vs galerie).
+           Sur desktop, la zone ci-dessus est le seul CTA d'import. -->
+      <div class="upload-actions hidden" id="upload-actions">
+        <button type="button" class="btn-camera" id="btn-camera" onclick="event.stopPropagation(); document.getElementById('camera-input').click()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Prendre une photo
         </button>
         <button type="button" class="btn-upload" id="btn-upload" onclick="event.stopPropagation(); document.getElementById('file-input').click()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Importer une photo
+          Importer depuis la galerie
         </button>
       </div>
       <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">

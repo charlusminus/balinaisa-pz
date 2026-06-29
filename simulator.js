@@ -103,13 +103,14 @@ function handleFileUpload(input) {
   reader.readAsDataURL(file);
 }
 
-// Show the "Prendre une photo" button only on devices with a camera (mobile/tablet)
+// Camera/gallery buttons only on mobile (tablet/phone). On desktop the
+// drop zone stays the single import CTA — no redundant button.
 document.addEventListener('DOMContentLoaded', () => {
-  const camBtn = document.getElementById('btn-camera');
-  if (!camBtn) return;
+  const actions = document.getElementById('upload-actions');
+  if (!actions) return;
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
     || (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
-  if (isMobile) camBtn.classList.remove('hidden');
+  if (isMobile) actions.classList.remove('hidden');
 });
 
 // Drag & drop

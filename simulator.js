@@ -34,7 +34,7 @@ let qty = 1;
 function startSimulator() {
   document.getElementById('hero').classList.add('hidden');
   document.getElementById('simulator').classList.remove('hidden');
-  document.getElementById('cta-widget').classList.add('hidden');
+  document.getElementById('cta-widget')?.classList.add('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   renderCatalog('all');
 }
@@ -42,7 +42,7 @@ function startSimulator() {
 function backToHome() {
   document.getElementById('simulator').classList.add('hidden');
   document.getElementById('hero').classList.remove('hidden');
-  document.getElementById('cta-widget').classList.remove('hidden');
+  document.getElementById('cta-widget')?.classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

@@ -11,11 +11,11 @@ Le flow écrit le lead **deux fois** pour ne jamais perdre la donnée si l'IA é
 2. **Phase 2** (`step_8`, `update_row`) — après génération IA : met à jour **la même ligne** avec les produits recommandés, le devis et le lien de simulation, puis `Statut = "Simulation générée"`.
 3. **Puis** les emails partent (`step_3` Balinaisa, `step_4` client).
 
-### En-tête à mettre (ligne 1) — 13 colonnes A→M
+### En-tête à mettre (ligne 1) — 16 colonnes A→P
 ```
-Date | Heure | Profil | Entreprise | Prénom | Nom | Email | Téléphone | Horizon achat | Statut | Produits recommandés (IA) | Devis estimatif (IA) | Lien simulation
+Date | Heure | Profil | Entreprise | Prénom | Nom | Email | Téléphone | Horizon achat | Statut | Produits recommandés | Quantité | Total HT | TVA | Total TTC | Lien simulation
 ```
-Les ~11 lignes existantes sont des tests : tu peux les vider (garde la ligne 1).
+Colonnes K→P (Produits, Quantité, Total HT, TVA, Total TTC, Lien simulation) = sortie de l'IA, écrites en phase 2 et reprises dans les 2 emails. Les ~11 lignes existantes sont des tests : tu peux les vider (garde la ligne 1).
 
 ## 3. Activepieces (flow live)
 

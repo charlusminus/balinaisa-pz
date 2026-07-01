@@ -164,16 +164,34 @@
                       "K": {
                         "type": "SHORT_TEXT",
                         "required": false,
-                        "displayName": "Produits recommandés (IA)",
+                        "displayName": "Produits recommandés",
                         "defaultValue": ""
                       },
                       "L": {
                         "type": "SHORT_TEXT",
                         "required": false,
-                        "displayName": "Devis estimatif (IA)",
+                        "displayName": "Quantité",
                         "defaultValue": ""
                       },
                       "M": {
+                        "type": "SHORT_TEXT",
+                        "required": false,
+                        "displayName": "Total HT",
+                        "defaultValue": ""
+                      },
+                      "N": {
+                        "type": "SHORT_TEXT",
+                        "required": false,
+                        "displayName": "TVA",
+                        "defaultValue": ""
+                      },
+                      "O": {
+                        "type": "SHORT_TEXT",
+                        "required": false,
+                        "displayName": "Total TTC",
+                        "defaultValue": ""
+                      },
+                      "P": {
                         "type": "SHORT_TEXT",
                         "required": false,
                         "displayName": "Lien simulation",
@@ -225,7 +243,7 @@
                     },
                     "sampleData": {},
                     "sourceCode": {
-                      "code": "export const code = async (inputs) => {\n  // PLACEHOLDER V1 — remplacer par l'appel Vertex AI Imagen 3.\n  // À partir de la photo (photo_base64), l'IA :\n  //   1) sélectionne le mobilier d'extérieur teck Balinaisa adapté,\n  //   2) génère l'image de simulation,\n  //   3) produit un devis estimatif.\n  // Brancher : POST Vertex AI -> upload (Cloudinary/GCS/ImgBB) -> URL publique.\n  const imageUrl = `https://placehold.co/560x360/F2ECE3/B87D4B/png?text=Balinaisa+%E2%80%94+simulation+en+pr%C3%A9paration`;\n  return {\n    image_url: imageUrl,      // image affichée dans le mail client\n    image_link: imageUrl,     // lien stocké en Sheets (col. M)\n    products_label: '',       // ex: 'Fauteuil Luma ×2 + Table Indra' — rempli par l'IA\n    devis_label: '',          // ex: '1 480,00 €' — rempli par l'IA\n    status: 'placeholder_v1'\n  };\n};",
+                      "code": "export const code = async (inputs) => {\n  // PLACEHOLDER V1 — remplacer par l'appel Vertex AI Imagen 3.\n  // À partir de la photo, l'IA : (1) sélectionne le mobilier teck Balinaisa,\n  // (2) génère l'image de simulation, (3) calcule un devis (qté + totaux).\n  // Brancher : POST Vertex AI -> upload (Cloudinary/GCS/ImgBB) -> URL publique,\n  // et renseigner products_label / qty / total_ht / tva / total_ttc.\n  const imageUrl = `https://placehold.co/560x360/F2ECE3/B87D4B/png?text=Balinaisa+%E2%80%94+simulation+en+pr%C3%A9paration`;\n  return {\n    image_url: imageUrl,     // affichée dans le mail client\n    image_link: imageUrl,    // stockée en Sheets (col. P)\n    products_label: '',      // ex: 'Fauteuil Luma ×2 + Table Indra'\n    qty: '',                 // ex: 3\n    total_ht: '',            // ex: '1 233,33 €'\n    tva: '',                 // ex: '246,67 €'\n    total_ttc: '',           // ex: '1 480,00 €'\n    status: 'placeholder_v1'\n  };\n};",
                       "packageJson": "{}"
                     },
                     "errorHandlingOptions": {
@@ -260,8 +278,11 @@
                           "I": "{{step_2['output']['intent_label']}}",
                           "J": "Simulation générée",
                           "K": "{{step_6['output']['products_label']}}",
-                          "L": "{{step_6['output']['devis_label']}}",
-                          "M": "{{step_6['output']['image_link']}}"
+                          "L": "{{step_6['output']['qty']}}",
+                          "M": "{{step_6['output']['total_ht']}}",
+                          "N": "{{step_6['output']['tva']}}",
+                          "O": "{{step_6['output']['total_ttc']}}",
+                          "P": "{{step_6['output']['image_link']}}"
                         },
                         "first_row_headers": true,
                         "as_string": false,
@@ -338,16 +359,34 @@
                             "K": {
                               "type": "SHORT_TEXT",
                               "required": false,
-                              "displayName": "Produits recommandés (IA)",
+                              "displayName": "Produits recommandés",
                               "defaultValue": ""
                             },
                             "L": {
                               "type": "SHORT_TEXT",
                               "required": false,
-                              "displayName": "Devis estimatif (IA)",
+                              "displayName": "Quantité",
                               "defaultValue": ""
                             },
                             "M": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "displayName": "Total HT",
+                              "defaultValue": ""
+                            },
+                            "N": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "displayName": "TVA",
+                              "defaultValue": ""
+                            },
+                            "O": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "displayName": "Total TTC",
+                              "defaultValue": ""
+                            },
+                            "P": {
                               "type": "SHORT_TEXT",
                               "required": false,
                               "displayName": "Lien simulation",
@@ -379,7 +418,7 @@
                           ],
                           "bcc": [],
                           "auth": "{{connections['KjJDiOyNMh3TXw8HF9VFz']}}",
-                          "body": "<!DOCTYPE html><html><body style=\"font-family:Inter,Arial,sans-serif;background:#EAE2D8;padding:32px;margin:0\"><div style=\"max-width:620px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)\"><div style=\"background:#B87D4B;padding:24px 32px\"><table width=\"100%\"><tr><td style=\"font-size:20px;font-weight:700;color:#fff;letter-spacing:-.02em\">Balinaisa</td><td style=\"text-align:right;font-size:12px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em\">Nouveau lead simulateur</td></tr></table></div><div style=\"padding:32px\"><p style=\"margin:0 0 4px;font-size:22px;font-weight:600;color:#2A1F14\">{{step_2['output']['full_name']}}</p><p style=\"margin:0 0 20px;font-size:13px;color:#A09080\">Reçu le {{step_1['output']['date']}} à {{step_1['output']['time']}} via le Simulateur IA</p><div style=\"margin-bottom:24px\"><span style=\"display:inline-block;background:#2A1F14;color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin:0 8px 8px 0\">{{step_2['output']['profile_label']}}</span><span style=\"display:inline-block;background:#FBF4E8;border:1px solid #C4975A;color:#B87D4B;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:8px\">Horizon d'achat : {{step_2['output']['intent_label']}}</span></div><table style=\"width:100%;border-collapse:collapse;margin-bottom:28px\"><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em;width:130px\">Profil</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['profile_label']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Entreprise</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['company']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Email</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px\"><a href=\"mailto:{{step_2['output']['email']}}\" style=\"color:#B87D4B;text-decoration:none\">{{step_2['output']['email']}}</a></td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Téléphone</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['phone']}}</td></tr></table><a href=\"mailto:{{step_2['output']['email']}}?subject=Votre simulation Balinaisa&body=Bonjour {{step_2['output']['first_name']}},%0A%0A\" style=\"display:inline-block;background:#B87D4B;color:#fff;padding:13px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600\">Répondre à {{step_2['output']['first_name']}} →</a></div><div style=\"background:#F2ECE3;padding:14px 32px;border-top:1px solid #DDD5C8\"><p style=\"margin:0;font-size:12px;color:#A09080\">Lead enregistré dans Google Sheets · Simulateur propulsé par <a href=\"https://paktiz.fr\" style=\"color:#B87D4B;text-decoration:none\">Paktiz</a></p></div></div></body></html>",
+                          "body": "<!DOCTYPE html><html><body style=\"font-family:Inter,Arial,sans-serif;background:#EAE2D8;padding:32px;margin:0\"><div style=\"max-width:620px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)\"><div style=\"background:#B87D4B;padding:24px 32px\"><table width=\"100%\"><tr><td style=\"font-size:20px;font-weight:700;color:#fff;letter-spacing:-.02em\">Balinaisa</td><td style=\"text-align:right;font-size:12px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em\">Nouveau lead simulateur</td></tr></table></div><div style=\"padding:32px\"><p style=\"margin:0 0 4px;font-size:22px;font-weight:600;color:#2A1F14\">{{step_2['output']['full_name']}}</p><p style=\"margin:0 0 20px;font-size:13px;color:#A09080\">Reçu le {{step_1['output']['date']}} à {{step_1['output']['time']}} via le Simulateur IA</p><div style=\"margin-bottom:24px\"><span style=\"display:inline-block;background:#2A1F14;color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin:0 8px 8px 0\">{{step_2['output']['profile_label']}}</span><span style=\"display:inline-block;background:#FBF4E8;border:1px solid #C4975A;color:#B87D4B;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:8px\">Horizon d'achat : {{step_2['output']['intent_label']}}</span></div><table style=\"width:100%;border-collapse:collapse;margin-bottom:28px\"><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em;width:130px\">Profil</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['profile_label']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Entreprise</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['company']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Email</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px\"><a href=\"mailto:{{step_2['output']['email']}}\" style=\"color:#B87D4B;text-decoration:none\">{{step_2['output']['email']}}</a></td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Téléphone</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_2['output']['phone']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Produits recommandés</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_6['output']['products_label']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Quantité</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14\">{{step_6['output']['qty']}}</td></tr><tr><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:12px;color:#A09080;text-transform:uppercase;letter-spacing:.06em\">Total TTC</td><td style=\"padding:10px 0;border-bottom:1px solid #DDD5C8;font-size:14px;color:#2A1F14;font-weight:700\">{{step_6['output']['total_ttc']}}</td></tr></table><a href=\"mailto:{{step_2['output']['email']}}?subject=Votre simulation Balinaisa&body=Bonjour {{step_2['output']['first_name']}},%0A%0A\" style=\"display:inline-block;background:#B87D4B;color:#fff;padding:13px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600\">Répondre à {{step_2['output']['first_name']}} →</a></div><div style=\"background:#F2ECE3;padding:14px 32px;border-top:1px solid #DDD5C8\"><p style=\"margin:0;font-size:12px;color:#A09080\">Lead enregistré dans Google Sheets · Simulateur propulsé par <a href=\"https://paktiz.fr\" style=\"color:#B87D4B;text-decoration:none\">Paktiz</a></p></div></div></body></html>",
                           "from": "charles.alzon@gmail.com",
                           "replyTo": "{{step_2['output']['email']}}",
                           "subject": "🪵 Nouveau lead — {{step_2['output']['full_name']}} · {{step_2['output']['profile_label']}} · {{step_2['output']['intent_label']}}",
@@ -452,7 +491,7 @@
                             ],
                             "bcc": [],
                             "auth": "{{connections['KjJDiOyNMh3TXw8HF9VFz']}}",
-                            "body": "<!DOCTYPE html><html><body style=\"font-family:Inter,Arial,sans-serif;background:#EAE2D8;padding:32px;margin:0\"><div style=\"max-width:580px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)\"><div style=\"background:#B87D4B;padding:28px 32px\"><p style=\"margin:0;font-size:18px;font-weight:700;color:#fff;letter-spacing:-.02em\">Balinaisa</p><p style=\"margin:4px 0 0;font-size:12px;color:rgba(255,255,255,.65)\">Mobilier d'extérieur en teck massif artisanal</p></div><div style=\"padding:36px 32px 28px\"><p style=\"margin:0 0 6px;font-size:26px;font-weight:500;color:#2A1F14;font-family:Georgia,serif\">Votre simulation est prête, {{step_2['output']['first_name']}} !</p><p style=\"margin:0 0 28px;font-size:15px;color:#7A6A58;line-height:1.7\">Voici votre rendu personnalisé : notre IA a sélectionné le mobilier d'extérieur en teck Balinaisa le mieux adapté à votre espace et l'a intégré à votre photo.</p><div style=\"border-radius:10px;overflow:hidden;margin-bottom:28px;line-height:0\"><img src=\"{{step_6['output']['image_url']}}\" alt=\"Votre simulation Balinaisa\" style=\"width:100%;display:block;border-radius:10px\" width=\"516\"></div><div style=\"background:#F2ECE3;border-left:4px solid #C4975A;border-radius:0 10px 10px 0;padding:20px 24px;margin-bottom:24px\"><p style=\"margin:0 0 6px;font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.08em\">Et maintenant ?</p><p style=\"margin:0;font-size:14px;color:#2A1F14;line-height:1.6\">Un conseiller Balinaisa vous recontacte pour affiner votre projet, vous présenter les pièces sélectionnées et établir un devis personnalisé.</p></div><div style=\"text-align:center;padding:8px 0 20px\"><a href=\"mailto:contact@balinaisa.com?subject=Suite%20simulation%20Balinaisa&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20recontact%C3%A9(e)%20suite%20%C3%A0%20ma%20simulation%20Balinaisa.%0A%0ANom%20%3A%20{{step_2['output']['full_name']}}%0AT%C3%A9l%C3%A9phone%20%3A%20{{step_2['output']['phone']}}%0A\" style=\"display:inline-block;background:#B87D4B;color:#fff;padding:15px 32px;border-radius:9px;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:-.01em\">Oui, je souhaite être recontacté →</a></div><p style=\"text-align:center;font-size:13px;color:#A09080;margin:0 0 28px\">Ou appelez-nous directement : <a href=\"tel:+33745065216\" style=\"color:#B87D4B;text-decoration:none;font-weight:600\">07 45 06 52 16</a></p><div style=\"background:#F2ECE3;border-radius:10px;padding:14px 18px\"><p style=\"margin:0;font-size:12px;color:#A09080\">📧 <a href=\"mailto:contact@balinaisa.com\" style=\"color:#B87D4B;text-decoration:none\">contact@balinaisa.com</a> · 📍 370 Av. de l'Aérodrome, 33260 La Teste-de-Buch</p></div></div><div style=\"background:#F2ECE3;padding:14px 32px;border-top:1px solid #DDD5C8\"><p style=\"margin:0;font-size:12px;color:#A09080\">© 2026 Balinaisa · <a href=\"https://balinaisa.com\" style=\"color:#B87D4B;text-decoration:none\">balinaisa.com</a></p></div></div></body></html>",
+                            "body": "<!DOCTYPE html><html><body style=\"font-family:Inter,Arial,sans-serif;background:#EAE2D8;padding:32px;margin:0\"><div style=\"max-width:580px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)\"><div style=\"background:#B87D4B;padding:28px 32px\"><p style=\"margin:0;font-size:18px;font-weight:700;color:#fff;letter-spacing:-.02em\">Balinaisa</p><p style=\"margin:4px 0 0;font-size:12px;color:rgba(255,255,255,.65)\">Mobilier d'extérieur en teck massif artisanal</p></div><div style=\"padding:36px 32px 28px\"><p style=\"margin:0 0 6px;font-size:26px;font-weight:500;color:#2A1F14;font-family:Georgia,serif\">Votre simulation est prête, {{step_2['output']['first_name']}} !</p><p style=\"margin:0 0 28px;font-size:15px;color:#7A6A58;line-height:1.7\">Voici votre rendu personnalisé : notre IA a sélectionné le mobilier d'extérieur en teck Balinaisa le mieux adapté à votre espace et l'a intégré à votre photo.</p><div style=\"border-radius:10px;overflow:hidden;margin-bottom:28px;line-height:0\"><img src=\"{{step_6['output']['image_url']}}\" alt=\"Votre simulation Balinaisa\" style=\"width:100%;display:block;border-radius:10px\" width=\"516\"></div><div style=\"border:1px solid #DDD5C8;border-radius:10px;padding:20px 24px;margin-bottom:24px\"><p style=\"margin:0 0 12px;font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.08em\">Votre devis estimatif</p><table style=\"width:100%;border-collapse:collapse\"><tr><td style=\"padding:6px 0;font-size:14px;color:#2A1F14\">{{step_6['output']['products_label']}}</td><td style=\"padding:6px 0;font-size:14px;color:#7A6A58;text-align:right\">Qté : {{step_6['output']['qty']}}</td></tr><tr><td style=\"padding:6px 0;font-size:13px;color:#7A6A58\">Total HT</td><td style=\"padding:6px 0;font-size:13px;color:#7A6A58;text-align:right\">{{step_6['output']['total_ht']}}</td></tr><tr><td style=\"padding:6px 0;font-size:13px;color:#7A6A58\">TVA (20%)</td><td style=\"padding:6px 0;font-size:13px;color:#7A6A58;text-align:right\">{{step_6['output']['tva']}}</td></tr><tr><td style=\"padding:10px 0 0;font-size:15px;font-weight:700;color:#2A1F14;border-top:1px solid #DDD5C8\">Total TTC</td><td style=\"padding:10px 0 0;font-size:15px;font-weight:700;color:#B87D4B;text-align:right;border-top:1px solid #DDD5C8\">{{step_6['output']['total_ttc']}}</td></tr></table></div><div style=\"background:#F2ECE3;border-left:4px solid #C4975A;border-radius:0 10px 10px 0;padding:20px 24px;margin-bottom:24px\"><p style=\"margin:0 0 6px;font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.08em\">Et maintenant ?</p><p style=\"margin:0;font-size:14px;color:#2A1F14;line-height:1.6\">Un conseiller Balinaisa vous recontacte pour affiner votre projet, vous présenter les pièces sélectionnées et établir un devis personnalisé.</p></div><div style=\"text-align:center;padding:8px 0 20px\"><a href=\"mailto:contact@balinaisa.com?subject=Suite%20simulation%20Balinaisa&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20recontact%C3%A9(e)%20suite%20%C3%A0%20ma%20simulation%20Balinaisa.%0A%0ANom%20%3A%20{{step_2['output']['full_name']}}%0AT%C3%A9l%C3%A9phone%20%3A%20{{step_2['output']['phone']}}%0A\" style=\"display:inline-block;background:#B87D4B;color:#fff;padding:15px 32px;border-radius:9px;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:-.01em\">Oui, je souhaite être recontacté →</a></div><p style=\"text-align:center;font-size:13px;color:#A09080;margin:0 0 28px\">Ou appelez-nous directement : <a href=\"tel:+33745065216\" style=\"color:#B87D4B;text-decoration:none;font-weight:600\">07 45 06 52 16</a></p><div style=\"background:#F2ECE3;border-radius:10px;padding:14px 18px\"><p style=\"margin:0;font-size:12px;color:#A09080\">📧 <a href=\"mailto:contact@balinaisa.com\" style=\"color:#B87D4B;text-decoration:none\">contact@balinaisa.com</a> · 📍 370 Av. de l'Aérodrome, 33260 La Teste-de-Buch</p></div></div><div style=\"background:#F2ECE3;padding:14px 32px;border-top:1px solid #DDD5C8\"><p style=\"margin:0;font-size:12px;color:#A09080\">© 2026 Balinaisa · <a href=\"https://balinaisa.com\" style=\"color:#B87D4B;text-decoration:none\">balinaisa.com</a></p></div></div></body></html>",
                             "from": "charles.alzon@gmail.com",
                             "replyTo": "contact@balinaisa.com",
                             "subject": "Votre simulation Balinaisa est prête, {{step_2['output']['first_name']}} ✦",

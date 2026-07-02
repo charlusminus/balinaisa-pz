@@ -636,6 +636,33 @@ input, textarea, select { font-family: var(--font-sans); }
 
 .tip-icon { color: var(--success); font-style: normal; }
 
+/* Champ préférences client (optionnel) */
+.client-note { margin-top: 1.25rem; }
+
+.client-note-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+}
+.client-note-label span { color: var(--text-muted); font-weight: 400; }
+
+.client-note-input {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color var(--transition);
+}
+.client-note-input::placeholder { color: var(--text-muted); }
+.client-note-input:focus { outline: none; border-color: var(--primary); }
+
 /* =============================================
    CATALOG GRID
    ============================================= */

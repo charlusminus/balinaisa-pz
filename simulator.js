@@ -234,6 +234,7 @@ async function submitLead(e) {
     profile:    profile, // 'particulier' | 'pro'
     is_pro:     profile === 'pro',
     company:    profile === 'pro' ? company : null,
+    client_note: (document.getElementById('f-note')?.value || '').trim() || null,
     photo_base64: uploadedDataURL || null,
     source:     'simulateur-balinaisa',
   };
@@ -262,6 +263,8 @@ function resetSimulator() {
   document.getElementById('upload-zone-inner').classList.remove('hidden');
   document.getElementById('upload-zone').classList.remove('has-file');
   document.getElementById('btn-step1-next').disabled = true;
+  const noteEl = document.getElementById('f-note');
+  if (noteEl) noteEl.value = '';
 
   const form = document.getElementById('lead-form');
   if (form) form.reset();

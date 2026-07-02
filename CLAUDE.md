@@ -11,7 +11,7 @@ Site statique du simulateur d'extérieur Balinaisa, servi par **GitHub Pages**
 ```
 index.html     — wizard (Photo → Coordonnées → Confirmation)
 styles.css     — design system
-simulator.js   — logique UI + envoi du lead au webhook Activepieces
+simulator.js   — logique UI + envoi du lead au webhook n8n
 embed.js       — snippet à coller sur balinaisa.com
 result.html    — page de rendu
 ```
@@ -20,10 +20,10 @@ result.html    — page de rendu
 Push sur `main` = mise en ligne (Pages, source `main` / root).
 
 ## Notes techniques
-- Le front **POST le lead en `application/json`** au webhook Activepieces (voir `simulator.js`).
+- Le front **POST le lead en `application/json`** au webhook n8n (voir `simulator.js`).
   ⚠️ Ne pas utiliser `mode:'no-cors'` : ça force `text/plain` et le backend ne parse plus le body.
 - La photo est **redimensionnée côté client** (~1200px, JPEG 0.85) avant envoi.
-- Toute la suite (traitement du lead, IA, emails) se passe **hors de ce repo**, dans le flow Activepieces.
+- Toute la suite (traitement du lead, IA, emails) se passe **hors de ce repo**, dans le flow n8n (automation).
 
 ## Règles
 - **Aucune clé / secret dans ce repo** (il est public).

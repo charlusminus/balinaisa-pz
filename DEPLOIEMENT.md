@@ -60,8 +60,11 @@ Modèle par défaut : `claude-opus-4-8` (input `model`, remplaçable par un Sonn
 - Fallbacks : si une clé manque ou qu'un appel échoue, on retombe sur l'image placeholder et le flow continue (lead + devis déjà sauvés).
 
 ### Pour activer (2 clés)
-1. **`gemini_api_key`** dans `step_9` — clé Google AI Studio (https://aistudio.google.com/apikey, simple clé API, **pas** de projet GCP/Vertex). Modèle par défaut `gemini-2.5-flash-image` (input `model`).
+1. **`gemini_api_key`** dans `step_9` — clé Google AI Studio (https://aistudio.google.com/apikey). Modèle par défaut `gemini-3.1-flash-image` (input `model` ; `gemini-3-pro-image` = qualité max, `gemini-2.5-flash-image` = fallback).
+   ⚠️ **Facturation obligatoire** : la génération d'image Gemini n'est **pas** dans le tier gratuit → sans billing activé sur le projet Google Cloud, l'API renvoie `429 "check your plan and billing"`. Activer la facturation puis retester.
 2. **`imgbb_api_key`** dans `step_10` — clé gratuite sur https://api.imgbb.com/.
+
+> Testé le 02/07/2026 : endpoint + modèle + parsing OK (l'appel atteint le modèle, seul le billing manque) ; ImgBB validé de bout en bout (upload → URL publique).
 
 ### Améliorer la fidélité produit (v2)
 V1 est *prompt-only* : Gemini place du mobilier teck conforme à la description, pas les SKU exacts. Pour la fidélité de marque, passer aussi des **images de référence** des produits sélectionnés (Gemini 2.5 Flash Image accepte plusieurs images en entrée) → ajouter une URL photo par produit dans le `CATALOG` de step_6 et les joindre dans `contents.parts` de step_9. Limite connue : reproduire un SKU pixel-perfect reste au front de l'état de l'art ; viser une intégration crédible (proportions/matières/couleurs).

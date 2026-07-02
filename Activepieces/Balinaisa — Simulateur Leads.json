@@ -268,7 +268,7 @@
                         "photo_base64": "{{step_2['output']['photo_base64']}}",
                         "image_prompt": "{{step_6['output']['image_prompt']}}",
                         "gemini_api_key": "",
-                        "model": "gemini-2.5-flash-image"
+                        "model": "gemini-3.1-flash-image"
                       },
                       "sampleData": {},
                       "sourceCode": {

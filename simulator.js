@@ -221,8 +221,9 @@ async function submitLead(e) {
   const lastName  = document.getElementById('f-lastname').value.trim();
   const company   = document.getElementById('f-company').value.trim();
 
-  // photo_base64 excluded: full-res base64 (3-10 MB) would overflow the AP webhook body
-  // limit and silently wipe all fields. Image handling goes through a separate upload step.
+  // photo_base64 : image redimensionnée (~1200px, JPEG 0.85 → ~200-400 Ko), assez
+  // légère pour le body du webhook. Utilisée par l'agent déco IA (step_6) pour
+  // analyser l'espace et sélectionner le mobilier Balinaisa.
   const payload = {
     first_name: firstName,
     last_name:  lastName,
@@ -233,6 +234,7 @@ async function submitLead(e) {
     profile:    profile, // 'particulier' | 'pro'
     is_pro:     profile === 'pro',
     company:    profile === 'pro' ? company : null,
+    photo_base64: uploadedDataURL || null,
     source:     'simulateur-balinaisa',
   };
 
